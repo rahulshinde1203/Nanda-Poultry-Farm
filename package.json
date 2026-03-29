@@ -1,0 +1,48 @@
+{
+  "name": "nanda-poultry-farm",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "tsx src/scripts/seed.ts",
+    "postinstall": "node scripts/copy-env.js; prisma generate",
+    "db:push": "node scripts/copy-env.js && prisma db push",
+    "fix-loginids": "node scripts/fix-loginids.js",
+    "db:migrate": "node scripts/copy-env.js && prisma migrate dev",
+    "db:studio": "node scripts/copy-env.js && prisma studio",
+    "db:reset": "node scripts/copy-env.js && prisma migrate reset"
+  },
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "typescript": "^5.4.0",
+    "next-auth": "^4.24.7",
+    "bcryptjs": "^2.4.3",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38",
+    "recharts": "^2.12.0",
+    "xlsx": "^0.18.5",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
+    "sonner": "^1.4.41",
+    "@prisma/client": "^5.14.0",
+    "mysql2": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/bcryptjs": "^2.4.6",
+    "tsx": "^4.7.3",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.0",
+    "prisma": "^5.14.0",
+    "dotenv-cli": "^7.4.2"
+  }
+}

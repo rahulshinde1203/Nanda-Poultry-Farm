@@ -1,0 +1,379 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+
+enum Role {
+  admin
+  salesperson
+  accountant
+}
+
+enum PaymentFor {
+  trader
+  company
+}
+
+enum PaymentMethod {
+  Cash
+  UPI
+  NEFT
+  RTGS
+  IMPS
+  Cheque
+  Other
+}
+
+enum PaymentStatus {
+  pending
+  verified
+  rejected
+}
+
+enum EditRequestStatus {
+  pending
+  approved
+  rejected
+}
+
+// ─── USER ────────────────────────────────────────────────
+
+model User {
+  id             Int       @id @default(autoincrement())
+  loginId        String    @unique @default("")   // manually assigned e.g. "USR001"
+  name           String
+  email          String    @unique
+  mobile         String    @unique
+  aadhaarNumber  String
+  aadhaarPhoto   String    @db.LongText
+  panNumber      String
+  panPhoto       String    @db.LongText
+  bankName       String
+  accountNumber  String
+  ifscCode       String
+  address        String?
+  password       String
+  role           Role
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  purchases        Purchase[]       @relation("PurchaseCreatedBy")
+  payments         Payment[]        @relation("PaymentCreatedBy")
+  verifiedPayments Payment[]        @relation("PaymentVerifiedBy")
+  expenses         Expense[]
+  expenseTypes     ExpenseType[]
+  traders          Trader[]
+  companies        Company[]
+  bankAccounts     BankAccount[]
+  bankStatements   BankStatement[]
+  editRequestsBy   EditRequest[]    @relation("EditRequestBy")
+  editRequestsReview EditRequest[]  @relation("EditRequestReview")
+  notifications    Notification[]
+  chatMessages     ChatMessage[]
+
+  @@map("users")
+}
+
+// ─── TRADER ──────────────────────────────────────────────
+
+model Trader {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  email              String    @unique
+  mobileNumber       String
+  whatsappNumber     String    @default("")
+  panNumber          String?
+  panCardPhoto       String?   @db.LongText
+  address            String?
+  outstandingBalance Float     @default(0)
+  isActive           Boolean   @default(true)
+  createdBy          Int
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  creator   User       @relation(fields: [createdBy], references: [id])
+  purchases Purchase[]
+  payments  Payment[]
+
+  @@map("traders")
+}
+
+// ─── COMPANY ─────────────────────────────────────────────
+
+model Company {
+  id                 Int                    @id @default(autoincrement())
+  name               String
+  email              String                 @unique
+  mobileNumber       String
+  whatsappNumber     String                 @default("")
+  panNumber          String?
+  panCardPhoto       String?                @db.LongText
+  address            String?
+  upiId              String?
+  upiQrCode          String?                @db.LongText
+  outstandingBalance Float                  @default(0)
+  isActive           Boolean                @default(true)
+  createdBy          Int
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  creator      User                   @relation(fields: [createdBy], references: [id])
+  purchases    Purchase[]
+  payments     Payment[]
+  bankAccounts CompanyBankAccount[]
+
+  @@map("companies")
+}
+
+// ─── COMPANY BANK ACCOUNT (embedded array → separate table) ──
+
+model CompanyBankAccount {
+  id                Int     @id @default(autoincrement())
+  companyId         Int
+  bankName          String
+  accountHolderName String
+  accountNumber     String
+  ifscCode          String
+  branchName        String
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("company_bank_accounts")
+}
+
+// ─── BANK ACCOUNT ────────────────────────────────────────
+
+model BankAccount {
+  id                Int       @id @default(autoincrement())
+  bankName          String
+  accountHolderName String
+  accountNumber     String    @unique
+  ifscCode          String
+  branchName        String
+  upiId             String?
+  upiQrCode         String?   @db.LongText
+  currentBalance    Float     @default(0)
+  isActive          Boolean   @default(true)
+  createdBy         Int
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  creator        User            @relation(fields: [createdBy], references: [id])
+  payments       Payment[]
+  expenses       Expense[]
+  bankStatements BankStatement[]
+
+  @@map("bank_accounts")
+}
+
+// ─── PURCHASE ────────────────────────────────────────────
+
+model Purchase {
+  id                  Int       @id @default(autoincrement())
+  date                DateTime  @default(now())
+  companyId           Int
+  traderId            Int
+  numberOfBirds       Int
+  totalWeight         Float
+  avgWeight           Float     @default(0)
+  purchaseRatePerKg   Float
+  saleRatePerKg       Float
+  vehicleNumber       String    @default("")
+  purchaseTotalAmount Float     @default(0)
+  saleTotalAmount     Float     @default(0)
+  grossProfit         Float     @default(0)
+  outstandingAmount   Float     @default(0)
+  notes               String    @default("")
+  createdBy           Int
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  company    Company  @relation(fields: [companyId], references: [id])
+  trader     Trader   @relation(fields: [traderId], references: [id])
+  creator    User     @relation("PurchaseCreatedBy", fields: [createdBy], references: [id])
+  editRequests EditRequest[]
+
+  @@index([date])
+  @@index([companyId])
+  @@index([traderId])
+  @@index([createdBy])
+  @@map("purchases")
+}
+
+// ─── PAYMENT ─────────────────────────────────────────────
+
+model Payment {
+  id               Int           @id @default(autoincrement())
+  date             DateTime      @default(now())
+  paymentFor       PaymentFor    @default(trader)
+  traderId         Int?
+  companyId        Int?
+  amount           Float
+  transactionId    String        @default("")
+  bankAccountId    Int?
+  paymentMethod    PaymentMethod?
+  chequeNumber     String        @default("")
+  utrNumber        String        @default("")
+  status           PaymentStatus @default(pending)
+  verifiedById     Int?
+  verifiedAt       DateTime?
+  rejectionReason  String        @default("")
+  notes            String        @default("")
+  createdBy        Int
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  trader      Trader?      @relation(fields: [traderId], references: [id])
+  company     Company?     @relation(fields: [companyId], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+  verifiedBy  User?        @relation("PaymentVerifiedBy", fields: [verifiedById], references: [id])
+  creator     User         @relation("PaymentCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@index([traderId])
+  @@index([companyId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ─── EXPENSE TYPE ─────────────────────────────────────────
+
+model ExpenseType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdBy Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  creator User @relation(fields: [createdBy], references: [id])
+
+  @@map("expense_types")
+}
+
+// ─── EXPENSE ─────────────────────────────────────────────
+
+model Expense {
+  id            Int           @id @default(autoincrement())
+  date          DateTime      @default(now())
+  expenseType   String
+  amount        Float
+  transactionId String        @default("")
+  bankAccountId Int?
+  paymentMethod PaymentMethod
+  notes         String        @default("")
+  createdBy     Int
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+  creator     User         @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@index([expenseType])
+  @@map("expenses")
+}
+
+// ─── BANK STATEMENT ──────────────────────────────────────
+
+model BankStatement {
+  id               Int      @id @default(autoincrement())
+  date             DateTime @default(now())
+  transactionId    String   @default("")
+  creditAmount     Float    @default(0)
+  debitAmount      Float    @default(0)
+  balance          Float    @default(0)
+  bankAccountId    Int
+  description      String   @default("")
+  remark           String   @default("")   // e.g. "Expense: Transport", "Payment from: star chicken"
+  sourceType       String   @default("manual") // manual | payment_verified | expense | advance
+  sourceId         Int?     // ID of the source record
+  isAutoGenerated  Boolean  @default(false)
+  relatedPaymentId Int?
+  createdBy        Int
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id])
+  creator     User        @relation(fields: [createdBy], references: [id])
+
+  @@index([date])
+  @@index([bankAccountId])
+  @@map("bank_statements")
+}
+
+// ─── EDIT REQUEST ─────────────────────────────────────────
+
+model EditRequest {
+  id            Int               @id @default(autoincrement())
+  purchaseId    Int
+  originalData  Json
+  requestedData Json
+  changedFields Json
+  reason        String
+  status        EditRequestStatus @default(pending)
+  requestedBy   Int
+  reviewedById  Int?
+  reviewedAt    DateTime?
+  reviewNote    String            @default("")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  purchase   Purchase @relation(fields: [purchaseId], references: [id])
+  requester  User     @relation("EditRequestBy", fields: [requestedBy], references: [id])
+  reviewer   User?    @relation("EditRequestReview", fields: [reviewedById], references: [id])
+
+  @@index([status])
+  @@index([requestedBy])
+  @@map("edit_requests")
+}
+
+// ─── NOTIFICATION ─────────────────────────────────────────
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String   // payment_verified | payment_rejected | edit_approved | edit_rejected | payment_pending | new_transaction
+  title     String
+  body      String
+  link      String   @default("")
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// ─── CHAT MESSAGE ─────────────────────────────────────────
+
+model ChatMessage {
+  id          Int      @id @default(autoincrement())
+  senderId    Int
+  text        String   @db.Text
+  mentions    Json     @default("[]")   // array of user IDs mentioned
+  reactions   Json     @default("{}")   // { "emoji": [userId, ...] }
+  replyToId   Int?
+  isEdited    Boolean  @default(false)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender  User         @relation(fields: [senderId], references: [id])
+  replyTo ChatMessage? @relation("ChatReply", fields: [replyToId], references: [id])
+  replies ChatMessage[] @relation("ChatReply")
+
+  @@index([createdAt])
+  @@index([senderId])
+  @@map("chat_messages")
+}
