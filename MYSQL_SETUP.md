@@ -78,7 +78,7 @@ Set your connection string:
 ```
 DATABASE_URL="mysql://root:YourPassword@localhost:3306/nanda_poultry"
 NEXTAUTH_SECRET="any-random-32-char-string"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3001"
 ```
 
 ---
@@ -99,7 +99,7 @@ That's it. Then start the app:
 npm run dev
 ```
 
-Open **http://localhost:3000**
+Open **http://localhost:3001**
 
 ---
 

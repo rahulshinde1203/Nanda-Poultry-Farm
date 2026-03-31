@@ -255,7 +255,7 @@ function UserForm({
                 onClear={() => onFileClear('panPhoto')}
               />
             </div>
-          </div>git
+          </div>
         </div>
  
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -300,7 +300,7 @@ function UserForm({
             </div>
           </div>
         </div>
-g
+
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="bg-purple-50 border-b border-purple-100 px-5 py-3">
             <h3 className="font-bold text-purple-800 text-sm">⚙️ Account Settings</h3>

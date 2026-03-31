@@ -75,7 +75,7 @@ async function seed() {
 
   console.log('\n🎉 Seed complete!\n');
   console.log('   ┌─────────────────────────────────────────────────┐');
-  console.log('   │  Login at http://localhost:3000/login           │');
+  console.log('   │  Login at http://localhost:3001/login           │');
   console.log('   ├──────────┬──────────────────────────┬───────────┤');
   console.log('   │ Login ID │ Password                 │ Role      │');
   console.log('   ├──────────┼──────────────────────────┼───────────┤');

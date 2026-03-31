@@ -33,7 +33,7 @@ npm install
 Create `.env.local` in the project root:
 ```env
 DATABASE_URL="mysql://USER:PASSWORD@localhost:3306/nanda_poultry"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3001"
 NEXTAUTH_SECRET="your-random-secret-here-min-32-chars"
 ```
 

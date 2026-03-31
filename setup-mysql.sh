@@ -51,7 +51,7 @@ DATABASE_URL="mysql://${DB_USER}:${ENCODED_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME
 
 # ─── NextAuth ─────────────────────────────────────────────
 NEXTAUTH_SECRET="${SECRET}"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3001"
 
 # ─── Optional: Twilio WhatsApp ───────────────────────────
 TWILIO_ACCOUNT_SID=""
@@ -87,7 +87,7 @@ echo -e "${BOLD}${GREEN}║   ✅  Setup Complete!                         ║${
 echo -e "${BOLD}${GREEN}╚══════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "  Start the app:  ${CYAN}npm run dev${NC}"
-echo -e "  Open browser:   ${CYAN}http://localhost:3000${NC}"
+echo -e "  Open browser:   ${CYAN}http://localhost:3001${NC}"
 echo ""
 echo "  Demo Login Accounts:"
 echo "  ┌──────────────────────────────────────────────┐"

@@ -20,7 +20,7 @@ Create `.env.local` file:
 ```env
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/nanda-poultry
 NEXTAUTH_SECRET=your-random-secret-min-32-chars
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3001
 TWILIO_ACCOUNT_SID=your_twilio_sid        # optional
 TWILIO_AUTH_TOKEN=your_twilio_token       # optional
 TWILIO_WHATSAPP_FROM=whatsapp:+14155238886 # optional
@@ -41,7 +41,7 @@ This creates: `admin@nanda.com` / `Admin@123`
 ```bash
 npm run dev
 ```
-Open http://localhost:3000
+Open http://localhost:3001
 
 ---
 
